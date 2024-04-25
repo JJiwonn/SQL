@@ -170,6 +170,168 @@ ORDER BY salary DESC;
 SELECT department_id, salary, first_name FROM employees
 ORDER BY department_id, salary DESC; -- 정렬기준을 어떻게 세우느냐에 따라서 성능과 출력결과에 영향을 미칠 수 있다
 
+------------------ 단일행 함수---------------
+-- 단일 레코드를 기준으로 특정 컬럼에 값에 적용되는 함수
+-- 문자열 단일행 함수
+SELECT first_name, last_name,  
+CONCAT(first_name, CONCAT(' ', last_name)),
+first_name||' '||last_name,
+INITCAP (first_name ||' ' || last_name) -- 각 단어의 첫글자를 대문자로 출력
+FROM employees;
+
+SELECT first_name, last_name,
+LOWER(first_name), UPPER(first_name),
+LPAD(first_name, 20, '#'), -- 왼쪽 빈자리 채움
+RPAD(first_name,20,'*')    -- 오른쪽 빈자리 채움
+FROM employees;
 
 
+SELECT '      Oracle           ', '*******Database********',
+LTRIM ('      Oracle           '), -- 왼쪽의 빈공간을 삭제
+RTRIM ('      Oracle           '),  -- 오른쪽의 빈공간을 삭제
+TRIM ('*'FROM'*******Database********'), -- 앞뒤에 잡음 문자를 삭제
+SUBSTR('Oracle Database', 8, 4),-- Oracle Database에서 공백포함 앞에서 8번째부터 4까지 길이를 출력
+SUBSTR('Oracle Database', -8, 4),-- Oracle Database에서 공백포함 뒤에서 8번째부터 4까지 길이를 출력
+LENGTH('Oracle Database') -- 문자열 길이
+FROM dual;
 
+-- 수치형 단일행 함수
+
+SELECT 3.14159 파이,
+    ABS(-3.14), -- 절대값
+    CEIL(-3.14), -- 올림함수
+    FLOOR(-3.14), -- 내림함수
+    ROUND(3.5), -- 반올림
+    ROUND(3.14159,3), -- 소수점 셋째자리까지 보여줘라(넷째자리에서 반올림)
+    TRUNC(3.5), -- 버림
+    TRUNC(3.14159,3), -- 소수점 셋짜자리까지 보여줘라(넷째자리에서 버림)
+    SIGN(-3.14159), -- 부호(-1:음수, 0:0, +1:양수)로 표현해라
+    MOD(7,3), -- 7을 3으로 나눈 나머지
+    POWER(2,4) -- 2의 4제곱
+FROM dual;
+
+-------------DATA FORMAT----------
+
+-- 현재 session 정보 확인
+SELECT * FROM nls_session_parameters;
+
+-- 현재 날짜 포맷이 어떻게 되는가
+-- 딕셔너리를 확인해야한다
+SELECT value FROM nls_session_parameters -- 환경변수 딕셔너리를 확인함
+WHERE parameter='NLS_DATE_FORMAT';
+
+-- 현재 날짜 : SYSDATE
+SELECT SYSDATE FROM dual; -- 가상테이블 dual로부터 받아옴으로 1개의 레코드
+
+SELECT SYSDATE FROM employees; -- employees 테이블로부터 받아옴으로 employees 테이블 레코드의 갯수만큼
+
+-- 날짜 관련 단일행 함수
+SELECT
+    sysdate,
+    ADD_MONTHS(sysdate, 1), -- 1개월이 지난 후의 날짜
+    LAST_DAY(sysdate), -- 현재 달의 마지막 날짜
+    MONTHS_BETWEEN('12/09/24',sysdate), -- 두 날짜 사이의 개월 차
+    NEXT_DAY(sysdate,7), -- 1:일 ~ 7:토
+    NEXT_DAY(sysdate,'일'), -- NLS_DATE_LANGUAGE의 설정에 따름
+    ROUND(sysdate,'MONTH'), -- MONTH를 기준으로 반올림
+    TRUNC(sysdate,'MONTH') -- MONTH를 기준으로 내림
+FROM dual;
+
+SELECT first_name, hire_date,
+    ROUND(MONTHS_BETWEEN(sysdate, hire_date))as 근속월수
+FROM employees;
+
+--------------변환함수------------
+-- TO_NUMBER(s, fmt): 문자열-> 숫자
+-- TO_DATE(s, fmt): 문자열-> 날짜
+-- TO_CHAR(d, fmt): 숫자, 날짜-> 문자열
+
+-- TO_CHAR
+SELECT 
+    first_name,
+    TO_CHAR(hire_date,'YYYY-MM-DD')as "년-월-일"
+FROM employees;
+
+-- 현재 시간을 년-월-일 시:분:초로 표기
+SELECT sysdate,
+    TO_CHAR(sysdate,'YYYY-MM-DD HH:MI:SS')
+FROM dual;
+
+SELECT
+    TO_CHAR(30000000,'L999,999,999')
+FROM dual;
+
+-- 모든 직원의 이름과 연봉 정보를 표시해보자
+SELECT first_name, salary, commission_pct,
+    TO_CHAR((salary + salary * nvl(commission_pct,0))*12, '$999,999.99') 연봉
+FROM employees;
+
+-- 문자-> 숫자: TO_NUMBER
+SELECT '$57,600',
+    TO_NUMBER('$57,600', '$999,999')/12 월급
+FROM dual;
+
+-- 문자-> 날짜: TO_DATE
+SELECT '2012-09-24 13:48:00' 어느날,
+    TO_DATE ('2012-09-24 13:48:00', 'YYYY-MM-DD HH24:MI:SS') 날짜
+FROM dual;
+
+-- 날짜 연산
+-- Date +/- Number : 특정 날수를 더하거나 뺄 수 있다
+-- Date - Date : 특정 날짜에서 특정 날짜를 빼면 두 날짜 사이에 경과일수를 확인 할 수 있다
+-- Date + Number / 24 : 특정 시간이 지난 후의 날짜
+SELECT sysdate,
+    sysdate +1 , sysdate -1,
+    sysdate - TO_DATE('20240424'),
+    sysdate + 48 /24
+FROM dual;
+
+-- NVL function
+SELECT first_name, 
+    salary, 
+    NVL(salary * commission_pct,0) commission
+FROM employees;
+
+-- NVL2 function
+SELECT first_name, 
+    salary, 
+    NVL2(commission_pct, salary / commission_pct,1) commission
+FROM employees;
+
+-- CASE function
+-- 보너스를 지급하기로 했을 때
+-- AD관련 직종에게는 20%, SA관련 직종에게는 10%, IT관련 직종에게는 8%, 나머지에게는 5%
+SELECT first_name, job_id, salary,
+    SUBSTR(job_id, 1, 2),
+    CASE SUBSTR(job_id, 1, 2) WHEN 'AD' THEN salary * 0.2
+                              WHEN 'SA' THEN salary * 0.1 
+                              WHEN 'IT' THEN salary *0.08
+                              ELSE salary *0.05
+    END 보너스
+FROM employees;
+
+-- DECODE 함수
+SELECT first_name, job_id, salary,
+    SUBSTR(job_id, 1, 2),
+    DECODE(SUBSTR(job_id, 1, 2),
+                         'AD' , salary * 0.2,
+                         'SA' , salary * 0.1, 
+                         'IT' , salary *0.08,
+                         salary *0.05) 보너스
+FROM employees;
+
+-- 연습문제(2_PDF_58p)
+-- 직원의 이름, 부서, 팀을 출력(팀은 부서 ID로 결정)
+-- 10 ~ 30 : A-GROUP
+-- 40 ~ 50 : B-GROUP
+-- 60 ~ 100 : C-GROUP
+-- 나머지부서 : REMAINDER
+SELECT first_name, department_id,
+    CASE WHEN department_id <=30 THEN 'A-GROUP'
+        WHEN department_id<=50  THEN 'B-GROUP'
+        WHEN department_id<=100 THEN 'C-GROUP'
+        ELSE 'REMAINDER' 
+    END team             
+FROM employees
+ORDER BY team ASC, department_id ASC;
+                
