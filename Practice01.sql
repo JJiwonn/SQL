@@ -31,12 +31,12 @@ SELECT first_name, salary, TO_CHAR(hire_date,'YYYY-MM'), department_id
 FROM employees
 WHERE department_id IN (10,90,100);
 
--- 문제7
+-- 문제7(S 또는 s 만족하도록 재확인)
 SELECT first_name, salary
 FROM employees
 WHERE first_name LIKE '%s%';
 
--- 문제8
+-- 문제8 (문자길이 재확인)
 SELECT department_id, department_name, manager_id, location_id
 FROM departments;
 
