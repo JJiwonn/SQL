@@ -23,26 +23,33 @@ ORDER BY max_salary DESC;
 -- 문제5
 SELECT first_name, salary ,NVL(commission_pct,0)
 FROM employees
-WHERE salary BETWEEN 10000 AND 14000
+WHERE salary >= 10000 AND salary < 14000
 ORDER BY salary DESC;
 
 -- 문제6
-SELECT first_name, salary, TO_CHAR(hire_date,'YYYY-MM'), department_id
+SELECT first_name, salary, TO_CHAR(hire_date,'YYYY-MM') hire_date, department_id
 FROM employees
 WHERE department_id IN (10,90,100);
 
 -- 문제7(S 또는 s 만족하도록 재확인)
 SELECT first_name, salary
 FROM employees
-WHERE first_name LIKE '%s%';
+WHERE UPPER(first_name) LIKE '%S%';
 
 -- 문제8 (문자길이 재확인)
-SELECT department_id, department_name, manager_id, location_id
-FROM departments;
+SELECT  department_name
+FROM departments
+ORDER BY LENGTH(department_name) DESC;
 
 -- 문제9
+SELECT UPPER(country_name) country_name
+FROM countries
+ORDER BY UPPER(country_name);
 
 -- 문제10 (전화번호 형태 재확인)
-SELECT first_name, salary, phone_number, hire_date
+SELECT first_name, 
+    salary, 
+    REPLACE(SUBSTR(phone_number,3),'.','-'),
+    hire_date
 FROM employees
-WHERE hire_date > '13/12/31';
+WHERE hire_date <= '13/12/31';
