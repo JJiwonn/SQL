@@ -169,3 +169,47 @@ CREATE SEQUENCE seq_book_id
     MAXVALUE 1000000
     NOCACHE;
     
+SELECT first_name ||' ' || last_name, salary
+FROM employees
+WHERE salary > 2000 AND salary < 10000
+ORDER BY salary ASC;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
